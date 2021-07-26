@@ -24,8 +24,13 @@ class User:
 class Account:
     def __init__(self, balance, savings, currency):
         self.balance = balance
-        self._saving = savings
+        self._savings = savings
         self._currency = currency
+
+    def __str__(self):
+        return f'Balance: {self.balance}\n' \
+               f'Savings: {self._savings}\n' \
+               f'Currency: {self._currency}'
 
     def balance_report(self):
         pass
