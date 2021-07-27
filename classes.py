@@ -1,4 +1,7 @@
-# User Class-
+import mask_password
+
+
+# User Class
 class User:
     def __init__(self, first_name, last_name, email, password):
         self.first_name = first_name
@@ -17,7 +20,38 @@ class User:
         pass
 
     def update_info(self):
-        pass
+        print(f"---Current Information---"
+              f"First Name: {self.first_name}"
+              f"Last Name: {self.last_name}"
+              f"Email: {self._email}\n")
+        while True:
+            print("---Update Information---")
+            first_name = input("First Name: ")
+            last_name = input("Last Name: ")
+            email = input("Email: ")
+            while True:
+                temp_password = mask_password.hide_pass(
+                    prompt='Current Password:')  # Prevent password from showing input
+                password = mask_password.hide_pass(prompt='New Password: ')
+                if password == temp_password:
+                    break
+                else:
+                    print("Error. Password doesn't match")
+
+            while True:
+                confirm = input("Update information? (y/n)>>")
+                if confirm == 'y':
+                    user = User(first_name, last_name, email, password)
+                    # TODO: Add function to update to DB
+
+                    break
+                elif confirm == 'n':
+                    print()
+                    break
+                else:
+                    print("Invalid Option\n")
+            if confirm == 'y':
+                break
 
 
 # Account Class
@@ -33,7 +67,7 @@ class Account:
                f'Currency: {self._currency}'
 
     def balance_report(self):
-        pass
+        print("===== Balance Report =====")
 
     def add_savings(self):
         pass
