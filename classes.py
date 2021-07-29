@@ -76,8 +76,41 @@ class Account:
         pass
 
     def change_currency(self):
-        pass
+        
+        print(f"""
+    You're using: {self._currency}
+    
+    Change it for: 
+    1. US Dollars
+    2. Euros
+    0. Cancel
+    """)
+        try:
+            opt = int(input("Option: "))
+        except:
+            print("Invalid Option\n")
+        else:
+            if opt == 1:
+                self._currency = "USD"
+            elif opt == 2:
+                self._currency = "EUR"
+            elif opt == 0:
+                pass
+            else:
+                print("Invalid Option\n")
+        
+    def info(self, user):
+        print(f"""
+===========================================================
+                                    Currency: {self._currency}
+            *Welcome {user.first_name} {user.last_name}!*
 
+        Total Balance: {self.balance}
+        Savings: {self._savings}
+
+===========================================================
+    """) 
+    
 
 # Movements Class
 class Movement:

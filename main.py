@@ -44,18 +44,9 @@ def main():
 def home(user):
     print()
     # TODO: change default account parameters for DB data
-    account = Account(0, 0, 'mxn')
-    print(f"""
-===========================================================
-                                    Currency: {account._currency}
-            *Welcome {user.first_name} {user.last_name}!*
-
-        Total Balance: {account.balance}
-        Savings: {account._savings}
-
-===========================================================
-    """)
+    account = Account(0, 0, 'MXN')
     while True:
+        account.info(user)
         print("""
         Please select an option to continue\n
         1. Movements Registry
@@ -75,6 +66,8 @@ def home(user):
                 account.balance_report()
             elif opt == 3:
                 user.update_info()
+            elif opt == 4:
+                account.change_currency()
             elif opt == 0:
                 while True:
                     confirm = input("Are you sure you want to log out? (y/n)>>")
