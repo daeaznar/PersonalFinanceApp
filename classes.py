@@ -76,7 +76,7 @@ class Account:
         pass
 
     def change_currency(self):
-        
+        # TODO: Function to change all
         print(f"""
     You're using: {self._currency}
     
@@ -92,6 +92,7 @@ class Account:
         else:
             if opt == 1:
                 self._currency = "USD"
+                
             elif opt == 2:
                 self._currency = "EUR"
             elif opt == 0:
