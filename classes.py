@@ -83,6 +83,7 @@ class Account:
     Change it for: 
     1. US Dollars
     2. Euros
+    3. Mexican Peso
     0. Cancel
     """)
         try:
@@ -95,6 +96,8 @@ class Account:
                 
             elif opt == 2:
                 self._currency = "EUR"
+            elif opt == 3:
+                self._currency = "MXN"
             elif opt == 0:
                 pass
             else:
