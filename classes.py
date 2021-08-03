@@ -1,5 +1,6 @@
 import mask_password
 import sqlite3
+import pandas as pd
 
 conn = sqlite3.connect('finance_app.db')
 cursor = conn.cursor()
@@ -104,29 +105,26 @@ class Account:
             else:
                 # TODO: Show Balance Report as table
                 if opt == 1:
-                    print("""ID - Movement Type  - Date - Amount - Description - Assigned Account""")
-                    for row in cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
-                                              "transaction_date > datetime('now', '-24 hour')",
-                                              {'account_id': self.account_id}):
-                        print(row)
+                    # Use Pandas to give table structure
+                    df = pd.read_sql_query("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                           "transaction_date > datetime('now', '-24 hour')",
+                                           conn, params=({'account_id': self.account_id}))
+                    print(df.head())
                 elif opt == 2:
-                    print("""ID - Movement Type  - Date - Amount - Description - Assigned Account""")
-                    for row in cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
-                                              "transaction_date > datetime('now', '-7 day')",
-                                              {'account_id': self.account_id}):
-                        print(row)
+                    df = pd.read_sql_query("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                           "transaction_date > datetime('now', '-7 day')",
+                                           conn, params=({'account_id': self.account_id}))
+                    print(df.head())
                 elif opt == 3:
-                    print("""ID - Movement Type  - Date - Amount - Description - Assigned Account""")
-                    for row in cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
-                                              "transaction_date > datetime('now', '-1 month')",
-                                              {'account_id': self.account_id}):
-                        print(row)
+                    df = pd.read_sql_query("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                           "transaction_date > datetime('now', '-1 month')",
+                                           conn, params=({'account_id': self.account_id}))
+                    print(df.head())
                 elif opt == 4:
-                    print("""ID - Movement Type  - Date - Amount - Description - Assigned Account""")
-                    for row in cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
-                                              "transaction_date > datetime('now', '-3 month')",
-                                              {'account_id': self.account_id}):
-                        print(row)
+                    df = pd.read_sql_query("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                           "transaction_date > datetime('now', '-3 month')",
+                                           conn, params=({'account_id': self.account_id}))
+                    print(df.head())
                 elif opt == 0:
                     break
                 else:
