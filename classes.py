@@ -27,8 +27,11 @@ class User:
             first_name = input("First Name: ")
             last_name = input("Last Name: ")
             email = input("Email: ")
-            check_mail = cursor.execute("SELECT email FROM user WHERE email = :email", {'email': email})
-            if check_mail:
+
+            cursor.execute("SELECT email FROM user WHERE email = :email", {'email': email})
+            check_mail = cursor.fetchall()
+
+            if len(check_mail) != 0:
                 print("Email is already taken\n")
             else:
                 print()
@@ -47,7 +50,7 @@ class User:
                         with conn:
                             cursor.execute(
                                 "UPDATE user SET first_name = :first_name, last_name = :last_name, email = :email, "
-                                "password = :password "
+                                "password = :password, update_at = CURRENT_TIMESTAMP"
                                 "WHERE email = :current_email",
                                 {'current_email': self.email, 'first_name': first_name, 'last_name': last_name,
                                  'email': email, 'password': password})
@@ -69,7 +72,8 @@ class User:
 
 # Account Class
 class Account:
-    def __init__(self, balance, savings, currency, user_id):
+    def __init__(self, account_id, balance, savings, currency, user_id):
+        self.account_id = account_id
         self.balance = balance
         self.savings = savings
         self.currency = currency
@@ -81,13 +85,87 @@ class Account:
                f'Currency: {self.currency}'
 
     def balance_report(self):
-        print("===== Balance Report =====")
+        while True:
+            print("Select time frame for de report\n"
+                  "1. Today\n"
+                  "2. This Week\n"
+                  "3. This Month\n"
+                  "4. Last 3 Months\n"
+                  "0. Return\n")
+            try:
+                opt = int(input("Option: "))
+            except:
+                print("Invalid Option\n")
+            else:
+                # TODO: Show Balance Report as table
+                if opt == 1:
+                    cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                   "transaction_date > datetime('now', '-24 hour')",
+                                   {'account_id': self.account_id})
+                    print(cursor.fetchall())
+                elif opt == 2:
+                    cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                   "transaction_date > datetime('now', '-7 day')",
+                                   {'account_id': self.account_id})
+                    print(cursor.fetchall())
+                elif opt == 3:
+                    cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                   "transaction_date > datetime('now', '-1 month')",
+                                   {'account_id': self.account_id})
+                    print(cursor.fetchall())
+                elif opt == 4:
+                    cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                   "transaction_date > datetime('now', '-3 month')",
+                                   {'account_id': self.account_id})
+                    print(cursor.fetchall())
+                else:
+                    print("Invalid Option\n")
 
     def add_savings(self):
-        pass
+        while True:
+            try:
+                amount = float(input(f"Specify amount to Add to Savings: (press 0 to cancel)"))
+            except:
+                print("Invalid Value\n")
+            else:
+                if amount == 0:
+                    break
+                else:
+                    if amount > self.balance:
+                        print("Error. There isn't enough in Balance")
+                    else:
+                        self.savings += amount
+                        self.balance -= amount
+                        with conn:
+                            cursor.execute("UPDATE account SET savings = :savings, balance = :balance"
+                                           "WHERE account_id = :account_id",
+                                           {'savings': self.savings, 'balance': self.balance,
+                                            'account_id': self.account_id})
+                            print("Movement Successful*")
+                    break
 
     def withdraw_savings(self):
-        pass
+        while True:
+            try:
+                amount = float(input(f"Specify amount to Withdraw from Savings: (press 0 to cancel)"))
+            except:
+                print("Invalid Value\n")
+            else:
+                if amount == 0:
+                    break
+                else:
+                    if amount > self.savings:
+                        print("Error. There isn't enough in Savings")
+                    else:
+                        self.savings -= amount
+                        self.balance += amount
+                        with conn:
+                            cursor.execute("UPDATE account SET savings = :savings, balance = :balance"
+                                           "WHERE account_id = :account_id",
+                                           {'savings': self.savings, 'balance': self.balance,
+                                            'account_id': self.account_id})
+                            print("Movement Successful*")
+                    break
 
     def change_currency(self):
         # TODO: Function to change all
@@ -129,6 +207,7 @@ class Account:
                 print("Invalid Option\n")
 
     def info(self, user):
+        # TODO: get info from DB to update
         print(f"""
 ===========================================================
                                     Currency: {self.currency}
@@ -140,18 +219,89 @@ class Account:
 ===========================================================
     """)
 
-    # Movements Class
 
-
+# Movements Class
 class Movement:
     def __init__(self, movement_type):
         self.movement_type = movement_type
 
-    def movements_menu(self):
-        pass
+    def movements_menu(self, account):
+        while True:
+            print()
+            print("Select Movement Type:\n"
+                  "1. Income\n"
+                  "2. Expense\n"
+                  "3. Add to Savings from Balance\n"
+                  "4. Withdraw from Savings to Balance\n"
+                  "0. Cancel\n")
+            try:
+                opt = int(input("Option: "))
+            except:
+                print("Invalid Option\n")
+            else:
+                if opt == 1:
+                    self.movement_type = 'Income'
+                    self.register_movement(account)
+                    break
+                elif opt == 2:
+                    if account.balance == 0:
+                        print("Error. Can't register expense if balance is 0")
+                        break
+                    else:
+                        self.movement_type = 'Expense'
+                        self.register_movement(account)
+                        break
+                elif opt == 3:
+                    account.add_savings()
+                    break
+                elif opt == 4:
+                    account.withdraw_savings()
+                    break
+                elif opt == 0:
+                    break
+                else:
+                    print("Invalid Option\n")
 
-    def register_movement(self):
-        pass
+    def register_movement(self, account):
+        print()
+        print(f"You're making a {self.movement_type}")
+        try:
+            amount = float(input(f"Specify amount of {self.movement_type}: "))
+        except:
+            print("Invalid Value\n")
+        else:
+            if self.movement_type == 'Expense' and amount > account.balance:
+                print("Error. Can't register expense greater than total balance")
+            else:
+                description = input(f"Specify a short description (optional): ")
+                cursor.execute("SELECT account_id FROM account WHERE account_id = :account_id",
+                               {'account_id': account.account_id})
+                account_id = cursor.fetchone()[0]
+                with conn:
+                    check_transact = cursor.execute("INSERT INTO transact(type, amount, description, account_id)"
+                                                    "VALUES(:type, :amount, :description, :account_id)",
+                                                    {'type': self.movement_type, 'amount': amount,
+                                                     'description': description, 'account_id': account_id})
+                    if check_transact:
+                        print("*Transaction Successful*")
+                        if self.movement_type == 'Income':
+                            new_balance = account.balance + amount
+                        elif self.movement_type == 'Expense':
+                            new_balance = account.balance - amount
+                        # TODO: Fix error
+                        cursor.execute("UPDATE account SET balance = :balance"
+                                       "WHERE account_id = :account_id",
+                                       {'balance': new_balance, 'account_id': account_id})
+                    else:
+                        print("Something went wrong. Please try again later.")
+
+                transaction_id = cursor.lastrowid  # Get most recent autoincrement id inserted
+
+                cursor.execute("SELECT transaction_date FROM transact WHERE transaction_id = :transaction_id",
+                               {'transaction_id': transaction_id})
+                transaction_date = cursor.fetchone()[0]
+                transact = Transaction(transaction_id, self.movement_type, transaction_date, amount, description)
+                transact.get_transaction_info(account)
 
     def modify_movement(self):
         pass
@@ -159,19 +309,29 @@ class Movement:
 
 # Transaction Class
 class Transaction:
-    def __init__(self, transaction_id, transaction_type, date_time, description):
+    def __init__(self, transaction_id, transaction_type, date_time, amount, description):
         self.transaction_id = transaction_id
         self.transaction_type = transaction_type
         self.date_time = date_time
-        self.amount = 0
+        self.amount = amount
         self.description = description
 
-    def set_date(self):
-        pass
+    def get_transaction_info(self, account):
+        print(f"""
+===========================================================
+                                    Currency: {account.currency}
+            *Transaction Information*
+
+        Transaction Number: {self.transaction_id}
+        Date: {self.date_time}
+        Amount: {self.amount}
+        Description: {self.description}
+        
+===========================================================
+    """)
 
     def set_amount(self, amount):
         self.amount = amount
 
     def set_description(self):
-        pass
-
+        self.description = input("Description: ")

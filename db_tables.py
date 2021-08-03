@@ -45,26 +45,27 @@ cursor.execute(""" CREATE TABLE IF NOT EXISTS
 # cursor.execute('drop table account')
 # cursor.execute('drop table transact')
 
-# cursor.execute("insert into user (first_name, last_name, email, password)"
-#                "values ('David', 'Aznar', 'dae.aznar@gmail.com', '123')")
-
-# cursor.execute("insert into account ('currency')"
-#                "values ('MXN')")
-
-# cursor.execute("SELECT user_id FROM user WHERE email = 'dae.aznar@gmail.com' ")
+# cursor.execute("SELECT user_id FROM user WHERE email = 'dae.aznar@git.com' ")
 # print(cursor.fetchall())
 # query = cursor.fetchone()[0]
 # print(query)
 
+# cursor.execute("INSERT INTO user(first_name, last_name, email, password)"
+#                "VALUES('John', 'Doe', 'john.doe@git.com', '123')")
+
 cursor.execute("select * from user")
-query = cursor.fetchall()
-print(query)
+print(cursor.fetchall())
 
+cursor.execute("select * from account")
+print(cursor.fetchall())
 
-# cursor.execute("select * from account")
+cursor.execute("select * from transact")
+print(cursor.fetchall())
+
+# cursor.execute("select * from transact where transaction_date > datetime('now', '-7 day')")
 # print(cursor.fetchall())
 
-# cursor.execute("delete from account where user_id=2")
+# cursor.execute("delete from transact where transaction_id=3")
 
 conn.commit()
 

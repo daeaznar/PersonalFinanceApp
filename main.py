@@ -25,7 +25,6 @@ def main():
         else:
             if opt == 1:
                 login()
-                break
             elif opt == 2:
                 register()
             elif opt == 0:
@@ -46,7 +45,6 @@ def main():
 
 # noinspection PyProtectedMember
 def home(user, account):
-    transacts = []
     print()
     while True:
         account.info(user)
@@ -64,22 +62,8 @@ def home(user, account):
             print("Invalid Option\n")
         else:
             if opt == 1:
-                while True:
-                    print("Select Movement Type:\n"
-                          "1. Deposit\n"
-                          "2. Withdrawal")
-                    try:
-                        opt = int(input("Option: "))
-                    except:
-                        print("Invalid Option\n")
-                    else:
-                        if opt == 1:
-                            transacts.append(Movement('Deposit'))
-                            break
-                        elif opt == 2:
-                            transacts.append(Movement('Withdrawal'))
-                        else:
-                            print("Invalid Option\n")
+                movement = Movement('')
+                movement.movements_menu(account)
             elif opt == 2:
                 account.balance_report()
             elif opt == 3:
@@ -108,8 +92,10 @@ def login():
     print()
     print("*Login*")
     while True:
-        print("Enter your credentials\n")
+        print("Enter your credentials (press 0 to cancel)\n")
         email = input("Email: ")
+        if email == '0':
+            break
         password = mask_password.hide_pass()
         try:
             # region Get User
@@ -143,7 +129,10 @@ def login():
                 cursor.execute("SELECT currency FROM account WHERE user_id = :user_id", {'user_id': user_id})
                 currency = cursor.fetchone()[0]
 
-                account = Account(balance, savings, currency, user_id)
+                cursor.execute("SELECT account_id FROM account WHERE user_id = :user_id", {'user_id': user_id})
+                account_id = cursor.fetchone()[0]
+
+                account = Account(account_id, balance, savings, currency, user_id)
                 # endregion
             else:
                 print('Something went wrong, please try again later')
@@ -158,11 +147,17 @@ def register():
     print()
     print("*Register*")
     while True:
+        print("Enter your information (press 0 to cancel)\n")
         first_name = input("First Name: ")
+        if first_name == '0':
+            break
         last_name = input("Last Name: ")
         email = input("Email: ")
-        check_mail = cursor.execute("SELECT email FROM user WHERE email = :email", {'email': email})
-        if check_mail:
+
+        cursor.execute("SELECT email FROM user WHERE email = :email", {'email': email})
+        check_mail = cursor.fetchall()
+
+        if len(check_mail) != 0:
             print("Email is already taken\n")
         else:
             print()
@@ -187,11 +182,14 @@ def register():
                         cursor.execute("SELECT user_id FROM user WHERE email = :email", {'email': user.email})
                         user_id = cursor.fetchone()[0]
 
-                        account = Account(0, 0, 'MXN', user_id)
-
                         cursor.execute("INSERT INTO account (currency, user_id)"
                                        "VALUES(:currency, :user_id)",
-                                       {'currency': account.currency, 'user_id': user_id})
+                                       {'currency': 'MXN', 'user_id': user_id})
+
+                        cursor.execute("SELECT account_id FROM account WHERE user_id = :user_id", {'user_id': user_id})
+                        account_id = cursor.fetchone()[0]
+
+                        account = Account(account_id, 0, 0, 'MXN', user_id)
 
                     home(user, account)
                     break
