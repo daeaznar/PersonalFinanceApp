@@ -58,13 +58,13 @@ class User:
 class Account:
     def __init__(self, balance, savings, currency):
         self.balance = balance
-        self._savings = savings
-        self._currency = currency
+        self.savings = savings
+        self.currency = currency
 
     def __str__(self):
         return f'Balance: {self.balance}\n' \
-               f'Savings: {self._savings}\n' \
-               f'Currency: {self._currency}'
+               f'Savings: {self.savings}\n' \
+               f'Currency: {self.currency}'
 
     def balance_report(self):
         print("===== Balance Report =====")

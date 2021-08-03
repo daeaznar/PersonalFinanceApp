@@ -1,8 +1,13 @@
 from sys import exit
-import getpass
+import sqlite3
 import mask_password
 
 from classes import User, Account, Movement, Transaction
+
+# Define connection and cursor
+conn = sqlite3.connect('finance_app.db')
+
+cursor = conn.cursor()
 
 
 def main():
@@ -41,13 +46,11 @@ def main():
 
 
 # noinspection PyProtectedMember
-def home(user):
+def home(user, account):
     print()
-    # TODO: change default account parameters for DB data
-    account = Account(0, 0, 'mxn')
     print(f"""
 ===========================================================
-                                    Currency: {account._currency}
+                                    Currency: {account.currency}
             *Welcome {user.first_name} {user.last_name}!*
 
         Total Balance: {account.balance}
@@ -93,7 +96,6 @@ def home(user):
                 print("Invalid Option\n")
 
 
-
 def login():
     print()
     print("*Login*")
@@ -112,7 +114,7 @@ def register():
         last_name = input("Last Name: ")
         email = input("Email: ")
         while True:
-            temp_password = mask_password.hide_pass()   # Prevent password from showing input
+            temp_password = mask_password.hide_pass()  # Prevent password from showing input
             password = mask_password.hide_pass(prompt='Confirm Password: ')
             if password == temp_password:
                 break
@@ -122,8 +124,17 @@ def register():
             confirm = input("Is your information correct? (y/n)>>")
             if confirm == 'y':
                 user = User(first_name, last_name, email, password)
-                home(user)
+                account = Account(0, 0, 'MXN')
+                home(user, account)
                 # TODO: Add function to save to DB
+                with conn:
+                    cursor.execute("INSERT INTO user VALUES(:first_name, :last_name, :email, :password)",
+                                   {'first_name': user.first_name, 'lastname': user.last_name, 'email': user.email,
+                                    'password': user.password})
+
+                    cursor.execute("INSERT INTO account ('currency, user_id')"
+                                   "VALUES(:currency, :user_id)",
+                                   {'currency': account.currency, 'user_id': user.user_id})
 
                 break
             elif confirm == 'n':

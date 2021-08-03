@@ -22,8 +22,8 @@ cursor.execute(""" CREATE TABLE IF NOT EXISTS
 cursor.execute(""" CREATE TABLE IF NOT EXISTS
     account(
         account_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        balance REAL,
-        savings REAL,
+        balance FLOAT DEFAULT 0 NOT NULL,
+        savings FLOAT DEFAULT 0 NOT NULL,
         currency TEXT,
         user_id INTEGER,
         FOREIGN KEY(user_id) REFERENCES user(user_id)
@@ -33,9 +33,9 @@ cursor.execute(""" CREATE TABLE IF NOT EXISTS
 cursor.execute(""" CREATE TABLE IF NOT EXISTS
     transact(
         transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        type TEXT,
+        type TEXT NOT NULL,
         transaction_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-        amount REAL,
+        amount FLOAT,
         description TEXT,
         account_id INTEGER,
         FOREIGN KEY(account_id) REFERENCES account(account_id)
@@ -48,10 +48,16 @@ cursor.execute(""" CREATE TABLE IF NOT EXISTS
 # cursor.execute("insert into user (first_name, last_name, email, password)"
 #                "values ('David', 'Aznar', 'dae.aznar@gmail.com', '123')")
 
+# cursor.execute("insert into account ('currency')"
+#                "values ('MXN')")
+
 # cursor.execute("select * from user")
 # print(cursor.fetchall())
 
-# cursor.execute("delete from user where user_id=1")
+# cursor.execute("select * from account")
+# print(cursor.fetchall())
+
+# cursor.execute("delete from user where user_id=2")
 
 conn.commit()
 
