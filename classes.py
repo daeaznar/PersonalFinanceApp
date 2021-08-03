@@ -24,7 +24,10 @@ class User:
               f"Email: {self.email}\n")
         while True:
             print("---Update Information---")
+            print("(press 0 to cancel)")
             first_name = input("First Name: ")
+            if first_name == '0':
+                break
             last_name = input("Last Name: ")
             email = input("Email: ")
 
@@ -49,9 +52,9 @@ class User:
                     if confirm == 'y':
                         with conn:
                             cursor.execute(
-                                "UPDATE user SET first_name = :first_name, last_name = :last_name, email = :email, "
-                                "password = :password, update_at = CURRENT_TIMESTAMP"
-                                "WHERE email = :current_email",
+                                """UPDATE user SET first_name = :first_name, last_name = :last_name, email = :email,
+                                password = :password, update_at = CURRENT_TIMESTAMP
+                                WHERE email = :current_email""",
                                 {'current_email': self.email, 'first_name': first_name, 'last_name': last_name,
                                  'email': email, 'password': password})
                         self.first_name = first_name
@@ -86,6 +89,7 @@ class Account:
 
     def balance_report(self):
         while True:
+            print()
             print("Select time frame for de report\n"
                   "1. Today\n"
                   "2. This Week\n"
@@ -94,37 +98,45 @@ class Account:
                   "0. Return\n")
             try:
                 opt = int(input("Option: "))
+                print()
             except:
                 print("Invalid Option\n")
             else:
                 # TODO: Show Balance Report as table
                 if opt == 1:
-                    cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
-                                   "transaction_date > datetime('now', '-24 hour')",
-                                   {'account_id': self.account_id})
-                    print(cursor.fetchall())
+                    print("""ID - Movement Type  - Date - Amount - Description - Assigned Account""")
+                    for row in cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                              "transaction_date > datetime('now', '-24 hour')",
+                                              {'account_id': self.account_id}):
+                        print(row)
                 elif opt == 2:
-                    cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
-                                   "transaction_date > datetime('now', '-7 day')",
-                                   {'account_id': self.account_id})
-                    print(cursor.fetchall())
+                    print("""ID - Movement Type  - Date - Amount - Description - Assigned Account""")
+                    for row in cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                              "transaction_date > datetime('now', '-7 day')",
+                                              {'account_id': self.account_id}):
+                        print(row)
                 elif opt == 3:
-                    cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
-                                   "transaction_date > datetime('now', '-1 month')",
-                                   {'account_id': self.account_id})
-                    print(cursor.fetchall())
+                    print("""ID - Movement Type  - Date - Amount - Description - Assigned Account""")
+                    for row in cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                              "transaction_date > datetime('now', '-1 month')",
+                                              {'account_id': self.account_id}):
+                        print(row)
                 elif opt == 4:
-                    cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
-                                   "transaction_date > datetime('now', '-3 month')",
-                                   {'account_id': self.account_id})
-                    print(cursor.fetchall())
+                    print("""ID - Movement Type  - Date - Amount - Description - Assigned Account""")
+                    for row in cursor.execute("SELECT * FROM transact WHERE account_id = :account_id AND "
+                                              "transaction_date > datetime('now', '-3 month')",
+                                              {'account_id': self.account_id}):
+                        print(row)
+                elif opt == 0:
+                    break
                 else:
                     print("Invalid Option\n")
 
     def add_savings(self):
         while True:
             try:
-                amount = float(input(f"Specify amount to Add to Savings: (press 0 to cancel)"))
+                print("Specify amount to Add to Savings (press 0 to cancel)")
+                amount = float(input("Amount: "))
             except:
                 print("Invalid Value\n")
             else:
@@ -137,17 +149,18 @@ class Account:
                         self.savings += amount
                         self.balance -= amount
                         with conn:
-                            cursor.execute("UPDATE account SET savings = :savings, balance = :balance"
-                                           "WHERE account_id = :account_id",
+                            cursor.execute("""UPDATE account SET savings = :savings, balance = :balance
+                                           WHERE account_id = :account_id""",
                                            {'savings': self.savings, 'balance': self.balance,
                                             'account_id': self.account_id})
-                            print("Movement Successful*")
+                            print("*Movement Successful*")
                     break
 
     def withdraw_savings(self):
         while True:
             try:
-                amount = float(input(f"Specify amount to Withdraw from Savings: (press 0 to cancel)"))
+                print("Specify amount to Add to Savings (press 0 to cancel)")
+                amount = float(input("Amount: "))
             except:
                 print("Invalid Value\n")
             else:
@@ -160,11 +173,11 @@ class Account:
                         self.savings -= amount
                         self.balance += amount
                         with conn:
-                            cursor.execute("UPDATE account SET savings = :savings, balance = :balance"
-                                           "WHERE account_id = :account_id",
+                            cursor.execute("""UPDATE account SET savings = :savings, balance = :balance
+                                           WHERE account_id = :account_id""",
                                            {'savings': self.savings, 'balance': self.balance,
                                             'account_id': self.account_id})
-                            print("Movement Successful*")
+                            print("*Movement Successful*")
                     break
 
     def change_currency(self):
@@ -207,7 +220,6 @@ class Account:
                 print("Invalid Option\n")
 
     def info(self, user):
-        # TODO: get info from DB to update
         print(f"""
 ===========================================================
                                     Currency: {self.currency}
@@ -273,7 +285,7 @@ class Movement:
             if self.movement_type == 'Expense' and amount > account.balance:
                 print("Error. Can't register expense greater than total balance")
             else:
-                description = input(f"Specify a short description (optional): ")
+                description = input("Specify a short description (optional): ")
                 cursor.execute("SELECT account_id FROM account WHERE account_id = :account_id",
                                {'account_id': account.account_id})
                 account_id = cursor.fetchone()[0]
@@ -288,13 +300,14 @@ class Movement:
                             new_balance = account.balance + amount
                         elif self.movement_type == 'Expense':
                             new_balance = account.balance - amount
-                        # TODO: Fix error
-                        cursor.execute("UPDATE account SET balance = :balance"
-                                       "WHERE account_id = :account_id",
-                                       {'balance': new_balance, 'account_id': account_id})
                     else:
                         print("Something went wrong. Please try again later.")
+                with conn:
+                    cursor.execute("""UPDATE account SET balance = :balance
+                                   WHERE account_id = :account_id""",
+                                   {'balance': new_balance, 'account_id': account_id})
 
+                account.balance = new_balance
                 transaction_id = cursor.lastrowid  # Get most recent autoincrement id inserted
 
                 cursor.execute("SELECT transaction_date FROM transact WHERE transaction_id = :transaction_id",
