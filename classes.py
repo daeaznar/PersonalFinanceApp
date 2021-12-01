@@ -346,3 +346,5 @@ class Transaction:
 
     def set_description(self):
         self.description = input("Description: ")
+
+
